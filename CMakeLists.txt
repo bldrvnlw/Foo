@@ -29,6 +29,7 @@ find_package(poco CONFIG)
 add_library(${PROJECT} STATIC ${SOURCES})
 target_compile_features(${PROJECT} PRIVATE cxx_std_17)
 target_include_directories(${PROJECT} PRIVATE "${poco_INCLUDE_DIRS}")
+target_include_directories(${PROJECT} INTERFACE $<INSTALL_INTERFACE:include>)
 target_link_libraries(${PROJECT} "Poco::Poco")
 target_compile_definitions(${PROJECT} PUBLIC POCO_STATIC)
 

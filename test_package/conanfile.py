@@ -1,6 +1,7 @@
 import os
 import platform
 from conans import ConanFile, CMake, tools
+from pathlib import Path
 
 
 class FooTestConan(ConanFile):

@@ -1,0 +1,17 @@
+apr*
+BZip2*
+expat*
+lz4*
+MySQL*
+OpenSSL*
+PCRE*
+Poco*
+PostgreSQL*
+SQLite3*
+ZLIB*
+zstd*
+*.json
+*.txt
+*.lock
+*.cmake
+test_package/build
