@@ -1,8 +1,6 @@
 from conans import ConanFile
 from conan.tools.cmake import CMakeDeps, CMake, CMakeToolchain
 from pathlib import Path
-import os
-import subprocess
 
 class FooConan(ConanFile):
     """Create a Foo or Foo_deps package
@@ -13,7 +11,7 @@ class FooConan(ConanFile):
         that depends on multi-config Foo (as build_requirement) and contain Foo's dependencies
     """
 
-    name = "Foo"
+    # name = "Foo" pass either Foo or Foo_deps as name
     default_version = "0.1"  # actual version supplied by the create command reference (e.g. conan create . Foo/m.n.o@)
     license = "MIT"
     default_name = "Foo"
@@ -41,17 +39,12 @@ class FooConan(ConanFile):
     def set_name(self):
         self.name = self.name or self.default_name
         print(f"Set name to : {self.name}")
-    
-    def build_requirements(self):
-        # The package is a build dependency of its corresponding _deps package
-        if self.name.endswith('_deps'):
-            print(f"Adding requirement: {self.default_name}/{self.version}")
-            self.build_requires(f"{self.default_name}/{self.version}")
 
     def requirements(self):
-        if self.settings.build_type == "None":
-            print("Skip root package requirements for build_type NONE")
-            return
+        if self.name.endswith('_deps'):
+            print(f"Adding requirement: {self.default_name}/{self.version}")
+            self.requires.add(f"{self.default_name}/{self.version}")
+
         self.requires.add("poco/1.10.1")
 
 
