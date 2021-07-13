@@ -56,47 +56,26 @@ class FooConan(ConanFile):
 
 
     def _build_install(self, build_type):
-        cmake = CMake(self) # , build_type=build_type
-        # cmake.definitions["FOO_VERSION"] = self.version
-        # cmake.definitions["POCO_ROOT_DIR"] = self.deps_cpp_info["poco"].rootpath
-        # print(f"POCO root {self.deps_cpp_info['poco'].rootpath}")
+        cmake = CMake(self) 
         cmake.configure()
         try:
             cmake.install(build_type=build_type)
             print("Conan cmake build complete")
         except:
             print("Conan cmake build error")
-
-    def _install(self, build_type, install_dir):
-        print(f"Installing config {build_type} in {str(install_dir)}")
-        result = None
-        try:
-            cmake = CMake(self)
-            cmake.install(build_type=build_type)
-            #result = subprocess.run(["cmake",
-            #                "--install", self.build_folder,
-            #                "--config", build_type,
-            #                "--verbose",
-            #                "--prefix", str(install_dir)],
-            #                encoding='UTF-8')
-            print("Install complete")
-
-        except OSError as e:
-            print(f"STDOUT \n {result.stdout}")
-            print(f"STDERR \n {result.stderr}")
         
     def build(self):
-        # Foo build_type Release builds Debug & Release
-        # Foo build_type Debug depends on Foo build_type Release
+        # Build Debug and Release
         if not self.name.endswith('_deps'):
             install_dir = Path(self.build_folder).joinpath("install")
             install_dir.mkdir(exist_ok=True)
             print(f"Self build {self.settings.build_type}")
-            self._build_install(self.settings.build_type)
-            #self._install(self.settings.build_type, install_dir)
-            # print(f"Self build Debug")
-            # self._build("Debug")
-            # self._install("Debug", install_dir)
+            if self.settings.compiler == "Visual Studio":
+                self.settings.compiler.runtime="MD"
+            self._build_install("Release")
+            if self.settings.compiler == "Visual Studio":
+                self.settings.compiler.runtime="MDd"
+            self._build_install("Debug")
 
 
     def package_id(self):
