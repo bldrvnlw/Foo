@@ -13,6 +13,7 @@ find_package(poco CONFIG REQUIRED)
 add_executable(example example.cpp)
 target_include_directories(example PRIVATE ${FOO_INCLUDE_DIR})
 target_link_libraries(example PRIVATE Foo::Foo)
+target_link_libraries(example PRIVATE Poco::Poco)
 
 install(TARGETS example
     RUNTIME DESTINATION bin)

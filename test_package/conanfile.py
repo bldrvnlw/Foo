@@ -27,7 +27,6 @@ class FooTestConan(ConanFile):
             print("Test consumption of HDILib in Release mode")
             self.settings.build_type = "Release"
             cmake = CMake(self, build_type="Release")
-        print(f"")
         cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_paths.cmake"
         cmake.configure()
         cmake.build()
@@ -41,7 +40,8 @@ class FooTestConan(ConanFile):
         if not tools.cross_building(self.settings):
             os.chdir("bin")
             if platform.system() == 'Windows':
-                examplePath = Path("./", str(self.build_folder), "bin", "example.exe")
+                examplePath = Path("./", str(self.build_folder),
+                                   "bin", "example.exe")
                 self.run(f"{str(examplePath)}")
             else:
                 self.run(".%sexample" % os.sep)

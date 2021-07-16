@@ -11,7 +11,5 @@ SQLite3*
 ZLIB*
 zstd*
 *.json
-*.txt
 *.lock
-*.cmake
 test_package/build

@@ -49,10 +49,11 @@ class FooConan(ConanFile):
         print(f"Set name to : {self.name}")
 
     def requirements(self):
+        # The Foo_deps package requires the Foo and the requirements
         if self.name.endswith('_deps'):
             print(f"Adding requirement: {self.default_name}/{self.version}")
             self.requires.add(f"{self.default_name}/{self.version}")
-
+        # This is removed from the conaninfo.txt
         self.requires.add("poco/1.9.4")
 
     def _build_install(self, build_type):
@@ -76,7 +77,7 @@ class FooConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 self.settings.compiler.runtime = "MDd"
             self._build_install("Debug")
-            # Remove requirements from the base package
+            # Remove requirements from the base package conaninfo.txt
             # This might not benecessary considering the intended usage
             self.info.full_requires.clear()
             self.info.requires.clear()
@@ -95,8 +96,11 @@ class FooConan(ConanFile):
         install_dir = Path(self.build_folder).joinpath("install")
         self.copy(pattern="*", src=str(install_dir))
         self.copy(pattern="*", src=str(install_dir))
+        if self.name.endswith('_deps'):
+            include_path = Path(self.package_folder).joinpath("include")
+            include_path.mkdir()
 
     def package_info(self):
         if not self.name.endswith('_deps'):
-            self.cpp_info.set_property("skip_deps_file", True)
-            self.cpp_info.requirements = None
+            pass
+            # self.cpp_info.set_property("skip_deps_file", True)

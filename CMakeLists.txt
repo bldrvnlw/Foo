@@ -30,8 +30,10 @@ add_library(${PROJECT} STATIC ${SOURCES})
 target_compile_features(${PROJECT} PRIVATE cxx_std_17)
 target_include_directories(${PROJECT} PRIVATE "${poco_INCLUDE_DIRS}")
 target_include_directories(${PROJECT} INTERFACE $<INSTALL_INTERFACE:include>)
-target_link_libraries(${PROJECT} "Poco::Poco")
+target_link_libraries(${PROJECT} PRIVATE "Poco::Poco")
 target_compile_definitions(${PROJECT} PUBLIC POCO_STATIC)
+# default is Poco:Poco in transitive INTERFACE_LINK_LIBRARIES
+set_target_properties(${PROJECT} PROPERTIES INTERFACE_LINK_LIBRARIES "")
 
 # Generate the version file for use with find_package
 configure_file(${CMAKE_SOURCE_DIR}/cmake/ConfigVersion.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/cmake/ConfigVersion.cmake" @ONLY)
