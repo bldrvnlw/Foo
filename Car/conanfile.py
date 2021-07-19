@@ -1,10 +1,6 @@
 from conans import ConanFile
 from conan.tools.cmake import CMakeDeps, CMake, CMakeToolchain
-from conans.client.output import ConanOutput
-from conans.client.command import Command
-from conans.client.conan_api import Conan
-from six import StringIO
-import re
+from pathlib import Path
 
 
 class CarConan(ConanFile):
@@ -19,26 +15,23 @@ class CarConan(ConanFile):
     )
     exports = "CMakeLists.txt", "*.cpp"
 
-    def _get_package_path(self, package_str):
-        stream = StringIO()
-        output = ConanOutput(stream)
-        conan_api = Conan(output=output)
-        command = Command(conan_api)
-        command.run(["info", f"{package_str}@", "--paths"])
-        outstr = stream.getvalue()
-        package_path = package_str.replace("/", r"\\")
-        pat = re.compile(fr"\n[ ]*package_folder: (.*{package_path}.*)\n")   # group capture raw string preserve \\
-        x = pat.search(outstr)  # first occurrence
-        package_root = x.groups()[0]  # e.g. 'C:\\Users\\bvanlew\\.conan\\data\\Foo\\0.2.0\\_\\_\\package\\f34583babc53eea864e76087e72c782c95f0f402'
-        return package_root.replace("\\", "/")
-
-    def _inject_package_root(self, package_str):
-        package_root = self._get_package_path(package_str)
-        with open("conan_toolchain.cmake", "a") as toolchain:
-            toolchain.write(fr"""
-set(CMAKE_MODULE_PATH "{package_root}" ${{CMAKE_MODULE_PATH}})
-set(CMAKE_PREFIX_PATH "{package_root}" ${{CMAKE_PREFIX_PATH}})
-            """)
+    def fix_config_packages(self):
+        """ Iterate the dependencies and add the package root where
+        it is marked as a "cmake_config_file" and when "skip_deps_file" is
+        enabled. Permits using a package locak cmake config-file.
+        """
+        package_names = {r.ref.name for r in self.dependencies.host.values()}
+        for package_name in package_names:
+            cpp_info = self.dependencies[f"{package_name}"].new_cpp_info
+            if (cpp_info.get_property("skip_deps_file", CMakeDeps) and
+                    cpp_info.get_property("cmake_config_file", CMakeDeps)):
+                package_root = Path(self.dependencies[
+                    f"{package_name}"].package_folder)
+                with open("conan_toolchain.cmake", "a") as toolchain:
+                    toolchain.write(fr"""
+set(CMAKE_MODULE_PATH "{package_root.as_posix()}" ${{CMAKE_MODULE_PATH}})
+set(CMAKE_PREFIX_PATH "{package_root.as_posix()}" ${{CMAKE_PREFIX_PATH}})
+                    """)
 
     def generate(self):
         print("In generate")
@@ -46,7 +39,7 @@ set(CMAKE_PREFIX_PATH "{package_root}" ${{CMAKE_PREFIX_PATH}})
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-        self._inject_package_root(r"Foo/0.2.0")
+        self.fix_config_packages()
 
     def build(self):
         cmake = CMake(self)

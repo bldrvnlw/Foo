@@ -102,5 +102,5 @@ class FooConan(ConanFile):
 
     def package_info(self):
         if not self.name.endswith('_deps'):
-            pass
-            # self.cpp_info.set_property("skip_deps_file", True)
+            self.cpp_info.set_property("skip_deps_file", True)
+            self.cpp_info.set_property("cmake_config_file", True)
